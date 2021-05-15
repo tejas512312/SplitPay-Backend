@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+GRAPHENE = {"SCHEMA": "spay.graphql.schema.schema"}
 
 # Application definition
 
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'spay',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
