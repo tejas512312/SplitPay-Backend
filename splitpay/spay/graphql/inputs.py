@@ -24,6 +24,6 @@ class GroupIdInput(graphene.InputObjectType):
 class ExpenseInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     amount = graphene.Int(required=True)
-    group = graphene.Int(required=True)
+    group = graphene.Field(GroupIdInput, required=True)
     friends = graphene.List(UserInput, required=True)
-    paidBy = graphene.List(UserInput, required=True)
+    paidBy = graphene.List(UserInputPrice, required=True)

@@ -43,7 +43,7 @@ class createExpense(graphene.Mutation):
     def mutate(self, info, new_expense):
         ok = True
         try:
-            group = models.Group.objects.get(pk=new_expense[0].group)
+            group = models.Group.objects.get(pk=new_expense[0].group['id'])
             groupUsers = group.users.all()
             friends = []
             paidBy = []
@@ -56,13 +56,24 @@ class createExpense(graphene.Mutation):
                     else:
                         friends.append(val)
 
+            userPrice = {}
+
             for obj in new_expense[0].paidBy:
+                id = 0
+                price = 0
                 for key, val in obj.items():
-                    if not val in friends:
-                        ok = False
-                        return createGroup(ok=ok)
+                    if key == 'id':
+                        if not val in friends:
+                            ok = False
+                            return createGroup(ok=ok)
+                        else:
+                            paidBy.append(val)
+                        id = val
                     else:
-                        paidBy.append(val)
+                        price = val
+
+                if id != 0 and price != 0:
+                    userPrice[id] = price
 
             expense = models.Expense.objects.create(name=new_expense[0].name,
                                                     amount=new_expense[0].amount,
@@ -81,8 +92,9 @@ class createExpense(graphene.Mutation):
 
                 for id in friends:
                     user = models.User.objects.get(pk=id)
-                    if id in paidBy:
-                        user.totalBalance += take
+                    if id in userPrice:
+                        user.totalBalance += userPrice[id]
+                        user.totalBalance -= divide
                     else:
                         user.totalBalance -= divide
                     user.save()
