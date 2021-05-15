@@ -12,6 +12,8 @@ class Users(models.Model):
     totalBalance = models.DecimalField(max_digits=100, decimal_places=2)
     photoUrl = models.URLField(null=True)
     phoneNumber = models.BigIntegerField()
+    amount_owed = models.DecimalField(null=True, decimal_places=2, max_digits=100)
+    amount_debit = models.DecimalField(null=True, decimal_places=2, max_digits=100)
 
 
 class Group(models.Model):

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db.models import fields
 from django.db.models.fields import BooleanField
 import graphene
+from graphene.types.scalars import ID
 from graphene_django import DjangoObjectType
 from spay.models import Users, Group, Expense
 
@@ -52,8 +53,51 @@ class ExpenseMutation(graphene.Mutation):
         return ExpenseMutation(status=True, updated_list=Expense.objects.all())
 
 
+class PaidByInput(graphene.InputObjectType):
+    id = graphene.ID()
+
+
+class FriendsInput(graphene.InputObjectType):
+    id = graphene.ID()
+
+
+class AddExpense(graphene.Mutation):
+    class Arguments:
+        expense_name = graphene.String(required=True)
+        total_amount = graphene.Float(required=True)
+        paid_by = graphene.List(PaidByInput, required=True)
+        friends = graphene.List(FriendsInput, required=True)
+        group = graphene.ID(required=True)
+
+    status = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, **kwargs):
+        print(kwargs)
+        temp = kwargs.get("paid_by")
+        temp1 = kwargs.get("friends")
+
+        group = Group.objects.get(id=kwargs.get("group"))
+        e = Expense.objects.create(
+            name=kwargs.get("expense_name"),
+            totalAmount=kwargs.get("total_amount"),
+            group=group,
+        )
+
+        for i in temp:
+            id_i = i["id"]
+            e.paidBy.add(Users.objects.get(id=id_i))
+
+        for i in temp1:
+            id_i = i["id"]
+            e.friends.add(Users.objects.get(id=id_i))
+
+        return AddExpense(status=True)
+
+
 class Mutation(graphene.ObjectType):
     update_expense = ExpenseMutation.Field()
+    add_expense = AddExpense.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
